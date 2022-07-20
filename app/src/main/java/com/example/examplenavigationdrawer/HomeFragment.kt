@@ -1,10 +1,14 @@
 package com.example.examplenavigationdrawer
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -33,8 +37,25 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        val view = inflater.inflate(R.layout.fragment_home, container, false)
+        val getButton = view.findViewById<View>(R.id.get_button)
+
+        val serviceGenerator = ServiceGenerator.buildService(ApiService::class.java)
+        val call = serviceGenerator.getProducts()
+
+        getButton.setOnClickListener {
+            call.enqueue(object : Callback<List<ProductModel>> {
+                override fun onResponse(call: Call<List<ProductModel>>, response: Response<List<ProductModel>>) {
+                    val products = response.body()
+                    Log.d("HomeFragment", "Products: $products")
+                }
+
+                override fun onFailure(call: Call<List<ProductModel>>, t: Throwable) {
+                    Log.d("HomeFragment", "Error: ${t.message}")
+                }
+            })
+        }
+        return view
     }
 
     companion object {
